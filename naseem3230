@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowAI - AI Video Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-film"></i>
+                <h1>FlowAI</h1>
+                <span class="beta-tag">BETA</span>
+            </div>
+            <p class="tagline">Transform images into cinematic videos with AI</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Left Panel - Input Controls -->
+            <div class="control-panel">
+                <!-- Image Upload Section -->
+                <section class="upload-section">
+                    <h2><i class="fas fa-images"></i> Upload Images</h2>
+                    <div class="upload-zone" id="imageUploadZone">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag & drop images or click to browse</p>
+                        <p class="upload-hint">Supported: JPG, PNG, WebP (max 5MB each)</p>
+                        <input type="file" id="imageInput" accept="image/*" multiple>
+                    </div>
+                    <div class="image-preview" id="imagePreview"></div>
+                </section>
+
+                <!-- Optional Video Reference -->
+                <section class="upload-section">
+                    <h2><i class="fas fa-video"></i> Optional Reference Video</h2>
+                    <div class="upload-zone" id="videoUploadZone">
+                        <i class="fas fa-video"></i>
+                        <p>Upload a video for style reference (optional)</p>
+                        <p class="upload-hint">MP4, WebM (max 50MB)</p>
+                        <input type="file" id="videoInput" accept="video/*">
+                    </div>
+                    <div class="video-preview" id="videoPreview"></div>
+                </section>
+
+                <!-- Prompt Section -->
+                <section class="prompt-section">
+                    <h2><i class="fas fa-keyboard"></i> Scene Description</h2>
+                    <div class="prompt-input">
+                        <textarea id="promptInput" placeholder="Describe your video scene in detail... 
+Example: 'A cinematic shot of a mountain landscape at sunrise with gentle camera movement from left to right, birds flying across the sky, and mist rising from the valleys.'" rows="4"></textarea>
+                        <div class="prompt-tools">
+                            <button class="tool-btn" id="promptSuggest"><i class="fas fa-lightbulb"></i> Suggest</button>
+                            <span class="char-count">0/500</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Video Settings -->
+                <section class="settings-section">
+                    <h2><i class="fas fa-sliders-h"></i> Video Settings</h2>
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <label for="duration"><i class="fas fa-clock"></i> Duration</label>
+                            <select id="duration">
+                                <option value="5">5 seconds</option>
+                                <option value="10" selected>10 seconds</option>
+                                <option value="15">15 seconds</option>
+                                <option value="30">30 seconds</option>
+                            </select>
+                        </div>
+                        <div class="setting-group">
+                            <label for="aspectRatio"><i class="fas fa-expand"></i> Aspect Ratio</label>
+                            <select id="aspectRatio">
+                                <option value="9:16">9:16 (Vertical)</option>
+                                <option value="16:9" selected>16:9 (Widescreen)</option>
+                                <option value="1:1">1:1 (Square)</option>
+                            </select>
+                        </div>
+                        <div class="setting-group">
+                            <label for="quality"><i class="fas fa-hd"></i> Quality</label>
+                            <select id="quality">
+                                <option value="720">720p</option>
+                                <option value="1080" selected>1080p</option>
+                            </select>
+                        </div>
+                        <div class="setting-group">
+                            <label for="fps"><i class="fas fa-tachometer-alt"></i> FPS</label>
+                            <select id="fps">
+                                <option value="24">24 fps (Cinematic)</option>
+                                <option value="30" selected>30 fps (Standard)</option>
+                                <option value="60">60 fps (Smooth)</option>
+                            </select>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Generate Button -->
+                <button class="generate-btn" id="generateBtn">
+                    <i class="fas fa-magic"></i> Generate AI Video
+                </button>
+            </div>
+
+            <!-- Right Panel - Preview & Output -->
+            <div class="preview-panel">
+                <!-- Progress Section -->
+                <div class="progress-section hidden" id="progressSection">
+                    <h2><i class="fas fa-spinner fa-spin"></i> Generating Video</h2>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="progress-text" id="progressText">Initializing...</div>
+                    </div>
+                    <div class="progress-steps">
+                        <div class="step active">
+                            <span class="step-icon">1</span>
+                            <span class="step-label">Processing Images</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-icon">2</span>
+                            <span class="step-label">Generating Motion</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-icon">3</span>
+                            <span class="step-label">Adding Sound Effects</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-icon">4</span>
+                            <span class="step-label">Syncing Music</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-icon">5</span>
+                            <span class="step-label">Final Rendering</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Output Section -->
+                <div class="output-section" id="outputSection">
+                    <h2><i class="fas fa-play-circle"></i> Generated Video</h2>
+                    <div class="video-container">
+                        <div class="video-placeholder" id="videoPlaceholder">
+                            <i class="fas fa-film"></i>
+                            <p>Your AI-generated video will appear here</p>
+                        </div>
+                        <video class="hidden" id="generatedVideo" controls></video>
+                    </div>
+                    
+                    <div class="video-info hidden" id="videoInfo">
+                        <div class="info-row">
+                            <span class="info-label">Duration:</span>
+                            <span class="info-value" id="infoDuration">10s</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Resolution:</span>
+                            <span class="info-value" id="infoResolution">1920x1080</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">FPS:</span>
+                            <span class="info-value" id="infoFPS">30</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">File Size:</span>
+                            <span class="info-value" id="infoSize">15.2 MB</span>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons hidden" id="actionButtons">
+                        <button class="action-btn download-btn" id="downloadBtn">
+                            <i class="fas fa-download"></i> Download Video
+                        </button>
+                        <button class="action-btn share-btn" id="shareBtn">
+                            <i class="fas fa-share-alt"></i> Share
+                        </button>
+                        <button class="action-btn regenerate-btn" id="regenerateBtn">
+                            <i class="fas fa-redo"></i> Regenerate
+                        </button>
+                    </div>
+
+                    <!-- Generation Details -->
+                    <div class="details-section">
+                        <h3>Generation Details</h3>
+                        <div class="details-content">
+                            <p><strong>Prompt:</strong> <span id="detailPrompt">No prompt entered</span></p>
+                            <p><strong>Images Used:</strong> <span id="detailImages">0 images</span></p>
+                            <p><strong>Reference Video:</strong> <span id="detailReference">None</span></p>
+                            <p><strong>AI Model:</strong> <span id="detailModel">Cinematic-Diffusion v2.1</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>FlowAI Video Generator • Powered by AI • <span id="apiStatus" class="api-status online"><i class="fas fa-circle"></i> AI Services Online</span></p>
+            <p class="disclaimer">This is a demonstration tool. Real AI APIs would be integrated in production.</p>
+        </footer>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #e2e8f0;
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #334155;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.logo i {
+    font-size: 32px;
+    color: #60a5fa;
+}
+
+.logo h1 {
+    font-size: 32px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.beta-tag {
+    background: #7c3aed;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.tagline {
+    color: #94a3b8;
+    font-size: 16px;
+}
+
+/* Main Content Layout */
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 30px;
+    flex: 1;
+}
+
+@media (max-width: 1200px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Control Panel */
+.control-panel {
+    background: rgba(30, 41, 59, 0.8);
+    border-radius: 16px;
+    padding: 25px;
+    border: 1px solid #334155;
+    backdrop-filter: blur(10px);
+}
+
+.upload-section, .prompt-section, .settings-section {
+    margin-bottom: 30px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #334155;
+}
+
+.upload-section:last-child, .settings-section {
+    border-bottom: none;
+}
+
+h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+h2 i {
+    color: #60a5fa;
+}
+
+/* Upload Zones */
+.upload-zone {
+    background: rgba(15, 23, 42, 0.6);
+    border: 2px dashed #475569;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-zone:hover {
+    border-color: #60a5fa;
+    background: rgba(15, 23, 42, 0.8);
+}
+
+.upload-zone i {
+    font-size: 48px;
+    color: #94a3b8;
+    margin-bottom: 15px;
+}
+
+.upload-zone p {
+    color: #cbd5e1;
+    margin-bottom: 5px;
+}
+
+.upload-hint {
+    font-size: 14px;
+    color: #64748b;
+}
+
+.upload-zone input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Image & Video Previews */
+.image-preview, .video-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.preview-item {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #1e293b;
+}
+
+.preview-item img, .preview-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.remove-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Prompt Section */
+.prompt-input {
+    position: relative;
+}
+
+textarea {
+    width: 100%;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid #475569;
+    border-radius: 12px;
+    padding: 15px;
+    color: #e2e8f0;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    resize: vertical;
+    transition: border-color 0.3s ease;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #60a5fa;
+}
+
+.prompt-tools {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.tool-btn {
+    background: #374151;
+    color: #e2e8f0;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.3s ease;
+}
+
+.tool-btn:hover {
+    background: #4b5563;
+}
+
+.char-count {
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+/* Settings Grid */
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+@media (max-width: 1400px) {
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.setting-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.setting-group label {
+    color: #cbd5e1;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+select {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid #475569;
+    border-radius: 8px;
+    padding: 12px;
+    color: #e2e8f0;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+select:focus {
+    outline: none;
+    border-color: #60a5fa;
+}
+
+/* Generate Button */
+.generate-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #60a5fa 0%, #7c3aed 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 18px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.generate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(96, 165, 250, 0.3);
+}
+
+.generate-btn:active {
+    transform: translateY(0);
+}
+
+/* Preview Panel */
+.preview-panel {
+    background: rgba(30, 41, 59, 0.8);
+    border-radius: 16px;
+    padding: 25px;
+    border: 1px solid #334155;
+    backdrop-filter: blur(10px);
+}
+
+/* Progress Section */
+.progress-section {
+    margin-bottom: 30px;
+}
+
+.progress-container {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #334155;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #60a5fa, #7c3aed);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+}
+
+.progress-steps::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: #334155;
+    z-index: 1;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.step-icon {
+    width: 24px;
+    height: 24px;
+    background: #334155;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+
+.step.active .step-icon {
+    background: #60a5fa;
+    color: white;
+}
+
+.step-label {
+    font-size: 12px;
+    color: #94a3b8;
+    text-align: center;
+}
+
+.step.active .step-label {
+    color: #e2e8f0;
+}
+
+/* Output Section */
+.video-container {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    aspect-ratio: 16/9;
+    position: relative;
+}
+
+.video-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+}
+
+.video-placeholder i {
+    font-size: 64px;
+    margin-bottom: 20px;
+}
+
+#generatedVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+}
+
+.video-info {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #334155;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    color: #94a3b8;
+}
+
+.info-value {
+    color: #e2e8f0;
+    font-weight: 500;
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+}
+
+.action-btn {
+    padding: 15px;
+    border-radius: 12px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.download-btn {
+    background: #10b981;
+    color: white;
+}
+
+.download-btn:hover {
+    background: #059669;
+}
+
+.share-btn {
+    background: #3b82f6;
+    color: white;
+}
+
+.share-btn:hover {
+    background: #2563eb;
+}
+
+.regenerate-btn {
+    background: #8b5cf6;
+    color: white;
+}
+
+.regenerate-btn:hover {
+    background: #7c3aed;
+}
+
+/* Details Section */
+.details-section {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.details-section h3 {
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: #f1f5f9;
+}
+
+.details-content p {
+    margin-bottom: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.details-content strong {
+    color: #cbd5e1;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #334155;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.api-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.api-status.online {
+    color: #10b981;
+}
+
+.api-status.offline {
+    color: #ef4444;
+}
+
+.api-status i {
+    font-size: 8px;
+}
+
+.disclaimer {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 5px;
+}
+
+/* Toast Notification */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #1e293b;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    border-left: 4px solid #60a5fa;
+}
+
+.toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+/**
+ * FlowAI Video Generator - Frontend Logic
+ * Main JavaScript file handling UI interactions and API communication
+ */
+
+class VideoGenerator {
+    constructor() {
+        this.uploadedImages = [];
+        this.referenceVideo = null;
+        this.generationId = null;
+        
+        this.initializeElements();
+        this.bindEvents();
+        this.updateCharCount();
+        this.checkAPIStatus();
+    }
+
+    /**
+     * Initialize DOM elements
+     */
+    initializeElements() {
+        // File upload elements
+        this.imageInput = document.getElementById('imageInput');
+        this.videoInput = document.getElementById('videoInput');
+        this.imagePreview = document.getElementById('imagePreview');
+        this.videoPreview = document.getElementById('videoPreview');
+        
+        // Text input
+        this.promptInput = document.getElementById('promptInput');
+        this.charCount = document.querySelector('.char-count');
+        
+        // Settings
+        this.durationSelect = document.getElementById('duration');
+        this.aspectRatioSelect = document.getElementById('aspectRatio');
+        this.qualitySelect = document.getElementById('quality');
+        this.fpsSelect = document.getElementById('fps');
+        
+        // Buttons
+        this.generateBtn = document.getElementById('generateBtn');
+        this.downloadBtn = document.getElementById('downloadBtn');
+        this.shareBtn = document.getElementById('shareBtn');
+        this.regenerateBtn = document.getElementById('regenerateBtn');
+        this.promptSuggestBtn = document.getElementById('promptSuggest');
+        
+        // Progress elements
+        this.progressSection = document.getElementById('progressSection');
+        this.progressFill = document.getElementById('progressFill');
+        this.progressText = document.getElementById('progressText');
+        this.progressSteps = document.querySelectorAll('.step');
+        
+        // Output elements
+        this.outputSection = document.getElementById('outputSection');
+        this.videoPlaceholder = document.getElementById('videoPlaceholder');
+        this.generatedVideo = document.getElementById('generatedVideo');
+        this.videoInfo = document.getElementById('videoInfo');
+        this.actionButtons = document.getElementById('actionButtons');
+        
+        // Detail elements
+        this.detailPrompt = document.getElementById('detailPrompt');
+        this.detailImages = document.getElementById('detailImages');
+        this.detailReference = document.getElementById('detailReference');
+        
+        // Info elements
+        this.infoDuration = document.getElementById('infoDuration');
+        this.infoResolution = document.getElementById('infoResolution');
+        this.infoFPS = document.getElementById('infoFPS');
+        this.infoSize = document.getElementById('infoSize');
+        
+        // Toast
+        this.toast = document.getElementById('toast');
+        
+        // API status
+        this.apiStatus = document.getElementById('apiStatus');
+    }
+
+    /**
+     * Bind event listeners
+     */
+    bindEvents() {
+        // File upload events
+        this.imageInput.addEventListener('change', (e) => this.handleImageUpload(e));
+        this.videoInput.addEventListener('change', (e) => this.handleVideoUpload(e));
+        
+        // Drag and drop for images
+        const imageZone = document.getElementById('imageUploadZone');
+        imageZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            imageZone.style.borderColor = '#60a5fa';
+            imageZone.style.background = 'rgba(15, 23, 42, 0.9)';
+        });
+        
+        imageZone.addEventListener('dragleave', () => {
+            imageZone.style.borderColor = '#475569';
+            imageZone.style.background = 'rgba(15, 23, 42, 0.6)';
+        });
+        
+        imageZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            imageZone.style.borderColor = '#475569';
+            imageZone.style.background = 'rgba(15, 23, 42, 0.6)';
+            
+            const files = Array.from(e.dataTransfer.files).filter(file => 
+                file.type.startsWith('image/')
+            );
+            this.handleImageFiles(files);
+        });
+        
+        // Drag and drop for video
+        const videoZone = document.getElementById('videoUploadZone');
+        videoZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            videoZone.style.borderColor = '#60a5fa';
+            videoZone.style.background = 'rgba(15, 23, 42, 0.9)';
+        });
+        
+        videoZone.addEventListener('dragleave', () => {
+            videoZone.style.borderColor = '#475569';
+            videoZone.style.background = 'rgba(15, 23, 42, 0.6)';
+        });
+        
+        videoZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            videoZone.style.borderColor = '#475569';
+            videoZone.style.background = 'rgba(15, 23, 42, 0.6)';
+            
+            const files = Array.from(e.dataTransfer.files).filter(file => 
+                file.type.startsWith('video/')
+            );
+            if (files.length > 0) {
+                this.handleVideoFile(files[0]);
+            }
+        });
+        
+        // Prompt events
+        this.promptInput.addEventListener('input', () => this.updateCharCount());
+        this.promptSuggestBtn.addEventListener('click', () => this.suggestPrompt());
+        
+        // Button events
+        this.generateBtn.addEventListener('click', () => this.generateVideo());
+        this.downloadBtn.addEventListener('click', () => this.downloadVideo());
+        this.shareBtn.addEventListener('click', () => this.shareVideo());
+        this.regenerateBtn.addEventListener('click', () => this.regenerateVideo());
+    }
+
+    /**
+     * Handle image file upload
+     */
+    handleImageUpload(event) {
+        const files = Array.from(event.target.files);
+        this.handleImageFiles(files);
+    }
+
+    /**
+     * Process image files and create previews
+     */
+    handleImageFiles(files) {
+        if (files.length === 0) return;
+        
+        // Limit to 10 images
+        if (files.length + this.uploadedImages.length > 10) {
+            this.showToast('Maximum 10 images allowed. Only first 10 will be used.', 'warning');
+            files = files.slice(0, 10 - this.uploadedImages.length);
+        }
+        
+        files.forEach(file => {
+            if (file.size > 5 * 1024 * 1024) {
+                this.showToast(`Image ${file.name} is too large (max 5MB)`, 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const imageData = {
+                    id: Date.now() + Math.random(),
+                    name: file.name,
+                    dataUrl: e.target.result,
+                    file: file
+                };
+                
+                this.uploadedImages.push(imageData);
+                this.createImagePreview(imageData);
+                this.updateImageCount();
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        this.imageInput.value = '';
+    }
+
+    /**
+     * Create image preview element
+     */
+    createImagePreview(imageData) {
+        const previewItem = document.createElement('div');
+        previewItem.className = 'preview-item';
+        previewItem.dataset.id = imageData.id;
+        
+        const img = document.createElement('img');
+        img.src = imageData.dataUrl;
+        img.alt = imageData.name;
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        removeBtn.onclick = () => this.removeImage(imageData.id);
+        
+        previewItem.appendChild(img);
+        previewItem.appendChild(removeBtn);
+        this.imagePreview.appendChild(previewItem);
+    }
+
+    /**
+     * Remove image from uploads
+     */
+    removeImage(id) {
+        this.uploadedImages = this.uploadedImages.filter(img => img.id !== id);
+        const previewItem = this.imagePreview.querySelector(`[data-id="${id}"]`);
+        if (previewItem) {
+            previewItem.remove();
+        }
+        this.updateImageCount();
+    }
+
+    /**
+     * Handle video file upload
+     */
+    handleVideoUpload(event) {
+        if (event.target.files.length === 0) return;
+        
+        const file = event.target.files[0];
+        this.handleVideoFile(file);
+    }
+
+    /**
+     * Process video file and create preview
+     */
+    handleVideoFile(file) {
+        if (file.size > 50 * 1024 * 1024) {
+            this.showToast('Video file is too large (max 50MB)', 'error');
+            return;
+        }
+        
+        this.referenceVideo = {
+            id: Date.now(),
+            name: file.name,
+            file: file
+        };
+        
+        this.createVideoPreview();
+        this.updateVideoReference();
+        
+        this.videoInput.value = '';
+    }
+
+    /**
+     * Create video preview element
+     */
+    createVideoPreview() {
+        this.videoPreview.innerHTML = '';
+        
+        const previewItem = document.createElement('div');
+        previewItem.className = 'preview-item';
+        
+        const video = document.createElement('video');
+        video.src = URL.createObjectURL(this.referenceVideo.file);
+        video.controls = true;
+        video.style.width = '100%';
+        video.style.height = '100%';
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        removeBtn.onclick = () => this.removeVideo();
+        
+        previewItem.appendChild(video);
+        previewItem.appendChild(removeBtn);
+        this.videoPreview.appendChild(previewItem);
+    }
+
+    /**
+     * Remove reference video
+     */
+    removeVideo() {
+        this.referenceVideo = null;
+        this.videoPreview.innerHTML = '';
+        this.updateVideoReference();
+    }
+
+    /**
+     * Update character count for prompt
+     */
+    updateCharCount() {
+        const length = this.promptInput.value.length;
+        this.charCount.textContent = `${length}/500`;
+        
+        if (length > 500) {
+            this.charCount.style.color = '#ef4444';
+        } else if (length > 400) {
+            this.charCount.style.color = '#f59e0b';
+        } else {
+            this.charCount.style.color = '#94a3b8';
+        }
+    }
+
+    /**
+     * Generate prompt suggestions using AI (mocked)
+     */
+    suggestPrompt() {
+        const suggestions = [
+            "A cinematic drone shot flying over a misty mountain range at sunrise with golden light breaking through clouds",
+            "A slow-motion shot of waves crashing against rocky cliffs with seagulls flying in the foreground",
+            "A timelapse of a bustling city street at night with car light trails and neon signs glowing",
+            "A macro shot of a dewdrop on a flower petal with sunlight creating rainbow reflections",
+            "A tracking shot through a dense forest with sunbeams filtering through the canopy"
+        ];
+        
+        const randomSuggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+        this.promptInput.value = randomSuggestion;
+        this.updateCharCount();
+        this.showToast('Prompt suggestion generated!', 'success');
+    }
+
+    /**
+     * Validate input before generation
+     */
+    validateInput() {
+        if (this.uploadedImages.length === 0) {
+            this.showToast('Please upload at least one image', 'error');
+            return false;
+        }
+        
+        if (!this.promptInput.value.trim()) {
+            this.showToast('Please enter a scene description', 'error');
+            return false;
+        }
+        
+        if (this.promptInput.value.length > 500) {
+            this.showToast('Prompt must be 500 characters or less', 'error');
+            return false;
+        }
+        
+        return true;
+    }
+
+    /**
+     * Generate video using AI
+     */
+    async generateVideo() {
+        if (!this.validateInput()) return;
+        
+        // Disable generate button
+        this.generateBtn.disabled = true;
+        this.generateBtn.innerHTML = '<
+
